@@ -1,0 +1,9 @@
+ALTER TABLE `empresas` ADD `passwordHash` text;--> statement-breakpoint
+ALTER TABLE `empresas` ADD `plano` varchar(50);--> statement-breakpoint
+ALTER TABLE `empresas` ADD `stripeCustomerId` varchar(255);--> statement-breakpoint
+ALTER TABLE `empresas` ADD `stripeSubscriptionId` varchar(255);--> statement-breakpoint
+ALTER TABLE `empresas` ADD `assinaturaStatus` varchar(50);--> statement-breakpoint
+ALTER TABLE `empresas` ADD `assinaturaExpiraEm` timestamp;--> statement-breakpoint
+ALTER TABLE `empresas` ADD `resetPasswordToken` varchar(255);--> statement-breakpoint
+ALTER TABLE `empresas` ADD `resetPasswordExpires` timestamp;--> statement-breakpoint
+ALTER TABLE `empresas` ADD CONSTRAINT `empresas_email_unique` UNIQUE(`email`);
