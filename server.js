@@ -22,8 +22,6 @@ app.get('/', (req, res) => {
 });
 
 // Conexão com MongoDB
-const mongoose = require('mongoose');
-
 async function connectDB() {
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
@@ -37,8 +35,6 @@ async function connectDB() {
   }
 }
 
-module.exports = connectDB;
-
 // Inicializar servidor
 const PORT = process.env.PORT || 5000;
 
@@ -49,4 +45,3 @@ connectDB().then(() => {
 });
 
 module.exports = app;
-
