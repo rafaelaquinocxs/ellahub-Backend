@@ -22,16 +22,22 @@ app.get('/', (req, res) => {
 });
 
 // Conexão com MongoDB
-const connectDB = async () => {
+const mongoose = require('mongoose');
+
+async function connectDB() {
   try {
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/ella-hub';
-    await mongoose.connect(mongoURI);
-    console.log('MongoDB conectado com sucesso');
-  } catch (error) {
-    console.error('Erro ao conectar com MongoDB:', error);
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("MongoDB Atlas conectado!");
+  } catch (err) {
+    console.error("Erro ao conectar com MongoDB:", err);
     process.exit(1);
   }
-};
+}
+
+module.exports = connectDB;
 
 // Inicializar servidor
 const PORT = process.env.PORT || 5000;
