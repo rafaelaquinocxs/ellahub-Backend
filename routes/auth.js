@@ -15,34 +15,17 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // 1. Buscar o token na coleção Diagnostico
-    const diagnostico = await Diagnostico.findOne({ token });
+    // Buscar usuário pelo token
+    const usuario = await Usuario.findOne({ token });
 
-    if (!diagnostico) {
+    if (!usuario) {
       return res.status(404).json({ 
         success: false, 
         message: 'Token inválido' 
       });
     }
 
-    // 2. O token é válido. Agora, buscar ou criar o usuário com base no whatsapp/telefone
-    const whatsapp = diagnostico.whatsapp;
-    let usuario = await Usuario.findOne({ telefone: whatsapp });
-
-    if (!usuario) {
-      // Se não existir, cria um novo usuário
-      usuario = new Usuario({
-        nome: `Usuária ${whatsapp}`,
-        email: `${whatsapp}@ellahub.com`, // Email temporário
-        telefone: whatsapp,
-        token: token, // Usa o token do diagnóstico como token de login
-        diagnosticoCompleto: true,
-        nivelNegocio: diagnostico.fase_diagnosticada,
-      });
-    }
-    
-    // Atualiza o token e último acesso
-    usuario.token = token;
+    // Atualizar último acesso
     usuario.ultimoAcesso = new Date();
     await usuario.save();
 
