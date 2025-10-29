@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Usuario = require('../models/Usuario');
-const Diagnostico = require('../models/Diagnostico');
+const Diagnostico = require('../models/Diagnostico'); // Assumindo que você tem um modelo Diagnostico
 
 // Login por token
 router.post('/login', async (req, res) => {
@@ -25,7 +24,7 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Se achou, devolve os dados do diagnóstico
+    // Retornar os dados
     res.json({
       success: true,
       message: 'Login realizado com sucesso',
@@ -51,36 +50,35 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Criar usuário de teste (para desenvolvimento)
+// Criar diagnóstico de teste (para desenvolvimento)
 router.post('/criar-usuario-teste', async (req, res) => {
   try {
-    const { nome, email, telefone } = req.body;
+    const { whatsapp } = req.body;
 
     // Gerar token único
     const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
-    const usuario = new Usuario({
-      nome: nome || 'Usuária Teste',
-      email: email || 'teste@ellahub.com',
-      telefone: telefone || '(11) 99999-9999',
-      token
+    const diagnostico = new Diagnostico({
+      whatsapp: whatsapp || '5599999999999',
+      token,
+      fase_diagnosticada: 'teste',
+      resumo_diagnostico: 'Diagnóstico gerado para testes',
+      principais_forcas: ['Teste força'],
+      principais_riscos_ou_lacunas: ['Teste risco'],
+      recomendacoes: ['Teste recomendação'],
+      created_at: new Date()
     });
 
-    await usuario.save();
+    await diagnostico.save();
 
     res.json({
       success: true,
-      message: 'Usuário de teste criado com sucesso',
-      usuario: {
-        id: usuario._id,
-        nome: usuario.nome,
-        email: usuario.email,
-        token: usuario.token
-      }
+      message: 'Diagnóstico de teste criado com sucesso',
+      diagnostico
     });
 
   } catch (error) {
-    console.error('Erro ao criar usuário teste:', error);
+    console.error('Erro ao criar diagnóstico teste:', error);
     res.status(500).json({ 
       success: false, 
       message: 'Erro interno do servidor' 
