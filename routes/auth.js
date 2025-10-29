@@ -15,30 +15,30 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Buscar usuário pelo token
-    const usuario = await Usuario.findOne({ token });
+    // Buscar diagnóstico pelo token
+    const diagnostico = await Diagnostico.findOne({ token });
 
-    if (!usuario) {
+    if (!diagnostico) {
       return res.status(404).json({ 
         success: false, 
         message: 'Token inválido' 
       });
     }
 
-    // Atualizar último acesso
-    usuario.ultimoAcesso = new Date();
-    await usuario.save();
-
+    // Se achou, devolve os dados do diagnóstico
     res.json({
       success: true,
       message: 'Login realizado com sucesso',
-      usuario: {
-        id: usuario._id,
-        nome: usuario.nome,
-        email: usuario.email,
-        token: usuario.token,
-        diagnosticoCompleto: usuario.diagnosticoCompleto,
-        nivelNegocio: usuario.nivelNegocio
+      diagnostico: {
+        id: diagnostico._id,
+        whatsapp: diagnostico.whatsapp,
+        token: diagnostico.token,
+        fase_diagnosticada: diagnostico.fase_diagnosticada,
+        resumo_diagnostico: diagnostico.resumo_diagnostico,
+        principais_forcas: diagnostico.principais_forcas,
+        principais_riscos_ou_lacunas: diagnostico.principais_riscos_ou_lacunas,
+        recomendacoes: diagnostico.recomendacoes,
+        created_at: diagnostico.created_at
       }
     });
 
@@ -89,4 +89,3 @@ router.post('/criar-usuario-teste', async (req, res) => {
 });
 
 module.exports = router;
-
