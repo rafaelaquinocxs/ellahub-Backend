@@ -68,17 +68,18 @@ router.post('/gerar', async (req, res) => {
       });
     }
 
-    const usuario = await Usuario.findOne({ token });
+    // Buscar diagnóstico pelo token
+    const diagnostico = await Diagnostico.findOne({ token });
 
-    if (!usuario) {
+    if (!diagnostico) {
       return res.status(404).json({
         success: false,
-        message: 'Usuário não encontrado',
+        message: 'Diagnóstico não encontrado para o token fornecido',
       });
     }
 
-    // Buscar diagnóstico com respostas
-    const diagnostico = await Diagnostico.findOne({ usuarioId: usuario._id });
+    // Buscar usuária pelo whatsapp do diagnóstico (opcional, para o prompt)
+    const usuaria = await Usuario.findOne({ whatsapp: diagnostico.whatsapp });
 
     if (!diagnostico || !diagnostico.respostas || diagnostico.respostas.length === 0) {
       return res.status(400).json({
@@ -87,7 +88,7 @@ router.post('/gerar', async (req, res) => {
       });
     }
 
-    console.log(`Gerando diagnóstico com IA para: ${usuario.nome}`);
+    console.log(`Gerando diagnóstico com IA para: ${usuaria ? usuaria.nome : diagnostico.whatsapp}`);
 
     // Montar prompt com as respostas
     let promptRespostas = '';
@@ -100,8 +101,8 @@ router.post('/gerar', async (req, res) => {
     const promptDiagnostico = `Você é a ELLA, mentora especializada em negócios femininos. Analise as respostas abaixo e gere um diagnóstico estratégico completo.
 
 INFORMAÇÕES DA EMPREENDEDORA:
-Nome: ${usuario.nome}
-Email: ${usuario.email}
+Nome: ${usuaria ? usuaria.nome : 'Não informado'}
+WhatsApp: ${diagnostico.whatsapp}
 
 RESPOSTAS DO QUESTIONÁRIO:
 ${promptRespostas}
@@ -223,9 +224,11 @@ RESPONDA APENAS COM O JSON, SEM TEXTO ADICIONAL.`;
       diagnostico.atualizadoEm = new Date();
       await diagnostico.save();
 
-      // Atualizar flag no usuário
-      usuario.diagnosticoCompleto = true;
-      await usuario.save();
+      // Atualizar flag na usuária (se existir)
+      if (usuaria) {
+        usuaria.diagnosticoCompleto = true;
+        await usuaria.save();
+      }
 
       return res.json({
         success: true,
