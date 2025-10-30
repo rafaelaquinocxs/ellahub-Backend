@@ -91,7 +91,9 @@ router.post('/gerar', async (req, res) => {
     }
 
     // Buscar usuária pelo whatsapp do diagnóstico (opcional, para o prompt)
-    const usuaria = await Usuario.findOne({ whatsapp: diagnostico.whatsapp });
+    const mongoose = require('mongoose');
+    const usuariaDoc = await mongoose.connection.collection('usuarias').findOne({ whatsapp: diagnostico.whatsapp });
+    const usuaria = usuariaDoc; // Manter compatibilidade com código existente
 
     // Converter para objeto JavaScript puro
     const diagnosticoObj = diagnostico.toObject ? diagnostico.toObject() : diagnostico;
@@ -391,7 +393,9 @@ router.get('/:token', async (req, res) => {
     // Por enquanto, apenas retorna o diagnóstico.
 
     // Buscar a usuária pelo whatsapp do diagnóstico
-    const usuaria = await Usuario.findOne({ whatsapp: diagnostico.whatsapp });
+    const mongoose = require('mongoose');
+    const usuariaDoc = await mongoose.connection.collection('usuarias').findOne({ whatsapp: diagnostico.whatsapp });
+    const usuaria = usuariaDoc; // Manter compatibilidade
     
     // Simula a estrutura de resposta que o frontend espera (usuario + diagnostico)
     // Converter para objeto JavaScript puro para garantir acesso aos campos
