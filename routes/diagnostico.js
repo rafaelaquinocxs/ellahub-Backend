@@ -328,14 +328,7 @@ router.get('/:token', async (req, res) => {
 
     return res.json({
       success: true,
-      usuario: {
-        id: usuario._id,
-        nome: usuario.nome,
-        email: usuario.email,
-        diagnosticoCompleto: usuario.diagnosticoCompleto,
-        nivelNegocio: usuario.nivelNegocio,
-      },
-      diagnostico: diagnostico || null,
+      diagnostico: diagnostico,
     });
   } catch (error) {
     console.error('Erro ao buscar diagnóstico:', error);
