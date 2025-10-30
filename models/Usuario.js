@@ -1,45 +1,49 @@
 const mongoose = require('mongoose');
 
 const usuarioSchema = new mongoose.Schema({
-  nome: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  email: {
+  whatsapp: {
     type: String,
     required: true,
     unique: true,
-    lowercase: true,
     trim: true
   },
-  telefone: {
+  nome: {
     type: String,
-    required: true
+    required: false,
+    trim: true
   },
-  token: {
+  idade: {
     type: String,
-    required: true,
-    unique: true
+    required: false
   },
-  diagnosticoCompleto: {
+  cidade: {
+    type: String,
+    required: false,
+    trim: true
+  },
+  estado: {
+    type: String,
+    required: false,
+    trim: true
+  },
+  estado_civil: {
+    type: String,
+    required: false
+  },
+  possui_filhos: {
     type: Boolean,
-    default: false
+    required: false
   },
-  nivelNegocio: {
+  qtd_filhos: {
     type: String,
-    enum: ['ideacao', 'inicio', 'operacao', 'crescimento'],
-    default: 'ideacao'
+    required: false
   },
-  criadoEm: {
-    type: Date,
-    default: Date.now
-  },
-  ultimoAcesso: {
+  updated_at: {
     type: Date,
     default: Date.now
   }
+}, {
+  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 });
 
 module.exports = mongoose.model('Usuario', usuarioSchema, 'usuarias');
-

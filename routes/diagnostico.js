@@ -326,6 +326,9 @@ router.get('/:token', async (req, res) => {
     // Se o frontend precisar de mais dados, o modelo Diagnostico precisa ser atualizado para incluir nome/email ou o frontend deve confiar apenas no token.
     // Por enquanto, apenas retorna o diagnóstico.
 
+    // Buscar a usuária pelo whatsapp do diagnóstico
+    const usuaria = await Usuario.findOne({ whatsapp: diagnostico.whatsapp });
+    
     // Simula a estrutura de resposta que o frontend espera (usuario + diagnostico)
     // Converter para objeto JavaScript puro para garantir acesso aos campos
     const diagnosticoObj = diagnostico.toObject();
@@ -334,7 +337,7 @@ router.get('/:token', async (req, res) => {
       success: true,
       usuario: {
         id: diagnosticoObj._id,
-        nome: `Usuário ${diagnosticoObj.whatsapp || 'Não informado'}`,
+        nome: usuaria ? usuaria.nome : `Usuário ${diagnosticoObj.whatsapp || 'Não informado'}`,
         email: `${diagnosticoObj.whatsapp || 'naoinformado'}@whatsapp.com`,
         diagnosticoCompleto: true,
         nivelNegocio: diagnosticoObj.fase_diagnosticada || 'Não definido',

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Diagnostico = require('../models/Diagnostico'); // Assumindo que você tem um modelo Diagnostico
+const Diagnostico = require('../models/Diagnostico');
+const Usuario = require('../models/Usuario');
 
 // Login por token
 router.post('/login', async (req, res) => {
@@ -24,6 +25,9 @@ router.post('/login', async (req, res) => {
       });
     }
 
+    // Buscar a usuária pelo whatsapp do diagnóstico
+    const usuaria = await Usuario.findOne({ whatsapp: diagnostico.whatsapp });
+    
     // Retornar os dados na mesma estrutura que /diagnostico/:token
     // Converter para objeto JavaScript puro para garantir acesso aos campos
     const diagnosticoObj = diagnostico.toObject();
@@ -33,7 +37,7 @@ router.post('/login', async (req, res) => {
       message: 'Login realizado com sucesso',
       usuario: {
         id: diagnosticoObj._id,
-        nome: `Usuário ${diagnosticoObj.whatsapp || 'Não informado'}`,
+        nome: usuaria ? usuaria.nome : `Usuário ${diagnosticoObj.whatsapp || 'Não informado'}`,
         email: `${diagnosticoObj.whatsapp || 'naoinformado'}@whatsapp.com`,
         diagnosticoCompleto: true,
         nivelNegocio: diagnosticoObj.fase_diagnosticada || 'Não definido',
