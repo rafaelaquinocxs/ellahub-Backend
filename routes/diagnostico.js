@@ -411,11 +411,18 @@ router.get('/:token', async (req, res) => {
         pontosFortesIdentificados: diagnosticoObj.principais_forcas || [],
         principaisDificuldades: diagnosticoObj.principais_riscos_ou_lacunas || [],
         recomendacoes: diagnosticoObj.recomendacoes || [],
-        planoAcao: diagnosticoObj.resultado?.planoAcao || {
-          curto_prazo: [],
-          medio_prazo: [],
-          longo_prazo: []
-        }
+        planoAcao: diagnosticoObj.resultado?.planoAcao || (
+          // Criar plano de ação baseado nas recomendações se não houver
+          diagnosticoObj.recomendacoes && diagnosticoObj.recomendacoes.length > 0 ? {
+            curto_prazo: diagnosticoObj.recomendacoes.slice(0, Math.ceil(diagnosticoObj.recomendacoes.length / 3)),
+            medio_prazo: diagnosticoObj.recomendacoes.slice(Math.ceil(diagnosticoObj.recomendacoes.length / 3), Math.ceil(diagnosticoObj.recomendacoes.length * 2 / 3)),
+            longo_prazo: diagnosticoObj.recomendacoes.slice(Math.ceil(diagnosticoObj.recomendacoes.length * 2 / 3))
+          } : {
+            curto_prazo: [],
+            medio_prazo: [],
+            longo_prazo: []
+          }
+        )
       };
     
     const diagnosticoFormatado = {
