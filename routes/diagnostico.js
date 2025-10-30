@@ -81,7 +81,33 @@ router.post('/gerar', async (req, res) => {
     // Buscar usuária pelo whatsapp do diagnóstico (opcional, para o prompt)
     const usuaria = await Usuario.findOne({ whatsapp: diagnostico.whatsapp });
 
-    if (!diagnostico || !diagnostico.respostas || diagnostico.respostas.length === 0) {
+    // Verificar se o diagnóstico já foi gerado (campos principais preenchidos)
+    if (diagnostico.fase_diagnosticada && diagnostico.resumo_diagnostico) {
+      console.log('✅ Diagnóstico já foi gerado anteriormente. Retornando dados existentes.');
+      
+      // Montar resultado a partir dos dados existentes no diagnóstico
+      const resultadoExistente = {
+        nivelNegocio: diagnostico.fase_diagnosticada || 'inicio',
+        score: 0, // Não temos score nos dados antigos
+        pontosFortesIdentificados: diagnostico.principais_forcas || [],
+        principaisDificuldades: diagnostico.principais_riscos_ou_lacunas || [],
+        recomendacoes: diagnostico.recomendacoes || [],
+        planoAcao: diagnostico.resultado?.planoAcao || {
+          curto_prazo: [],
+          medio_prazo: [],
+          longo_prazo: []
+        }
+      };
+      
+      return res.json({
+        success: true,
+        message: 'Diagnóstico já foi gerado anteriormente',
+        resultado: resultadoExistente,
+      });
+    }
+
+    // Se não foi gerado e não há respostas, retornar erro
+    if (!diagnostico.respostas || diagnostico.respostas.length === 0) {
       return res.status(400).json({
         success: false,
         message: 'Nenhuma resposta encontrada. Complete o questionário via WhatsApp primeiro.',
