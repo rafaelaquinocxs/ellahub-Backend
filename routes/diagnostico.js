@@ -327,16 +327,19 @@ router.get('/:token', async (req, res) => {
     // Por enquanto, apenas retorna o diagnóstico.
 
     // Simula a estrutura de resposta que o frontend espera (usuario + diagnostico)
+    // Converter para objeto JavaScript puro para garantir acesso aos campos
+    const diagnosticoObj = diagnostico.toObject();
+    
     return res.json({
       success: true,
       usuario: {
-        id: diagnostico._id,
-        nome: `Usuário ${diagnostico.whatsapp}`, // Simula um nome
-        email: `${diagnostico.whatsapp}@whatsapp.com`, // Simula um email
+        id: diagnosticoObj._id,
+        nome: `Usuário ${diagnosticoObj.whatsapp || 'Não informado'}`,
+        email: `${diagnosticoObj.whatsapp || 'naoinformado'}@whatsapp.com`,
         diagnosticoCompleto: true,
-        nivelNegocio: diagnostico.fase_diagnosticada || 'Não definido',
+        nivelNegocio: diagnosticoObj.fase_diagnosticada || 'Não definido',
       },
-      diagnostico: diagnostico,
+      diagnostico: diagnosticoObj,
     });
   } catch (error) {
     console.error('Erro ao buscar diagnóstico:', error);

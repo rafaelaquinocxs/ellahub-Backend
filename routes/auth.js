@@ -25,17 +25,20 @@ router.post('/login', async (req, res) => {
     }
 
     // Retornar os dados na mesma estrutura que /diagnostico/:token
+    // Converter para objeto JavaScript puro para garantir acesso aos campos
+    const diagnosticoObj = diagnostico.toObject();
+    
     res.json({
       success: true,
       message: 'Login realizado com sucesso',
       usuario: {
-        id: diagnostico._id,
-        nome: `Usuário ${diagnostico.whatsapp}`,
-        email: `${diagnostico.whatsapp}@whatsapp.com`,
+        id: diagnosticoObj._id,
+        nome: `Usuário ${diagnosticoObj.whatsapp || 'Não informado'}`,
+        email: `${diagnosticoObj.whatsapp || 'naoinformado'}@whatsapp.com`,
         diagnosticoCompleto: true,
-        nivelNegocio: diagnostico.fase_diagnosticada || 'Não definido',
+        nivelNegocio: diagnosticoObj.fase_diagnosticada || 'Não definido',
       },
-      diagnostico: diagnostico
+      diagnostico: diagnosticoObj
     });
 
   } catch (error) {
