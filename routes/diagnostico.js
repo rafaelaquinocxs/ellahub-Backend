@@ -311,16 +311,20 @@ router.get('/:token', async (req, res) => {
   try {
     const { token } = req.params;
 
-    const usuario = await Usuario.findOne({ token });
+    // A busca deve ser feita diretamente no modelo Diagnostico pelo token
+    const diagnostico = await Diagnostico.findOne({ token });
 
-    if (!usuario) {
+    if (!diagnostico) {
       return res.status(404).json({
         success: false,
-        message: 'Usuário não encontrado',
+        message: 'Diagnóstico não encontrado para o token fornecido',
       });
     }
 
-    const diagnostico = await Diagnostico.findOne({ usuarioId: usuario._id });
+    // Retorna apenas os dados do diagnóstico, já que o token é a chave
+    // Os dados do usuário (nome, email) não são necessários neste endpoint, pois não estão no Diagnostico model
+    // Se o frontend precisar de mais dados, o modelo Diagnostico precisa ser atualizado para incluir nome/email ou o frontend deve confiar apenas no token.
+    // Por enquanto, apenas retorna o diagnóstico.
 
     return res.json({
       success: true,
