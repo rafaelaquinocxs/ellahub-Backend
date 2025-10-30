@@ -40,7 +40,9 @@ router.post('/login', async (req, res) => {
     }
 
     // Buscar a usuária pelo whatsapp do diagnóstico
+    console.log('🔍 Buscando usuária com whatsapp:', diagnostico.whatsapp);
     const usuaria = await Usuario.findOne({ whatsapp: diagnostico.whatsapp });
+    console.log('👤 Usuária encontrada:', usuaria ? usuaria.nome : 'NÃO ENCONTRADA');
     
     // Retornar os dados na mesma estrutura que /diagnostico/:token
     // Converter para objeto JavaScript puro para garantir acesso aos campos
