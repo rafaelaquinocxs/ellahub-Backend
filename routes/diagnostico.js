@@ -326,8 +326,16 @@ router.get('/:token', async (req, res) => {
     // Se o frontend precisar de mais dados, o modelo Diagnostico precisa ser atualizado para incluir nome/email ou o frontend deve confiar apenas no token.
     // Por enquanto, apenas retorna o diagnóstico.
 
+    // Simula a estrutura de resposta que o frontend espera (usuario + diagnostico)
     return res.json({
       success: true,
+      usuario: {
+        id: diagnostico._id,
+        nome: `Usuário ${diagnostico.whatsapp}`, // Simula um nome
+        email: `${diagnostico.whatsapp}@whatsapp.com`, // Simula um email
+        diagnosticoCompleto: true,
+        nivelNegocio: diagnostico.fase_diagnosticada || 'Não definido',
+      },
       diagnostico: diagnostico,
     });
   } catch (error) {
