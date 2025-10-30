@@ -41,8 +41,12 @@ router.post('/login', async (req, res) => {
 
     // Buscar a usuária pelo whatsapp do diagnóstico
     console.log('🔍 Buscando usuária com whatsapp:', diagnostico.whatsapp);
-    const usuaria = await Usuario.findOne({ whatsapp: diagnostico.whatsapp });
-    console.log('👤 Usuária encontrada:', usuaria ? usuaria.nome : 'NÃO ENCONTRADA');
+    
+    // Buscar diretamente na coleção usuarias para evitar problemas com o modelo
+    const mongoose = require('mongoose');
+    const usuariaDoc = await mongoose.connection.collection('usuarias').findOne({ whatsapp: diagnostico.whatsapp });
+    
+    console.log('👤 Usuária encontrada:', usuariaDoc ? usuariaDoc.nome : 'NÃO ENCONTRADA');
     
     // Retornar os dados na mesma estrutura que /diagnostico/:token
     // Converter para objeto JavaScript puro para garantir acesso aos campos
@@ -53,7 +57,7 @@ router.post('/login', async (req, res) => {
       message: 'Login realizado com sucesso',
       usuario: {
         id: diagnosticoObj._id,
-        nome: usuaria ? usuaria.nome : `Usuário ${diagnosticoObj.whatsapp || 'Não informado'}`,
+        nome: usuariaDoc ? usuariaDoc.nome : `Usuário ${diagnosticoObj.whatsapp || 'Não informado'}`,
         email: `${diagnosticoObj.whatsapp || 'naoinformado'}@whatsapp.com`,
         diagnosticoCompleto: true,
         nivelNegocio: diagnosticoObj.fase_diagnosticada || 'Não definido',
