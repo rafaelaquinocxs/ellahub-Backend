@@ -81,18 +81,29 @@ router.post('/gerar', async (req, res) => {
     // Buscar usuária pelo whatsapp do diagnóstico (opcional, para o prompt)
     const usuaria = await Usuario.findOne({ whatsapp: diagnostico.whatsapp });
 
+    // Converter para objeto JavaScript puro
+    const diagnosticoObj = diagnostico.toObject ? diagnostico.toObject() : diagnostico;
+    
+    // Log de debug
+    console.log('DEBUG - Diagnóstico encontrado:', {
+      token: diagnosticoObj.token,
+      fase_diagnosticada: diagnosticoObj.fase_diagnosticada,
+      resumo_diagnostico: diagnosticoObj.resumo_diagnostico ? 'Existe' : 'Não existe',
+      tem_respostas: diagnosticoObj.respostas && diagnosticoObj.respostas.length > 0
+    });
+
     // Verificar se o diagnóstico já foi gerado (campos principais preenchidos)
-    if (diagnostico.fase_diagnosticada && diagnostico.resumo_diagnostico) {
+    if (diagnosticoObj.fase_diagnosticada && diagnosticoObj.resumo_diagnostico) {
       console.log('✅ Diagnóstico já foi gerado anteriormente. Retornando dados existentes.');
       
       // Montar resultado a partir dos dados existentes no diagnóstico
       const resultadoExistente = {
-        nivelNegocio: diagnostico.fase_diagnosticada || 'inicio',
+        nivelNegocio: diagnosticoObj.fase_diagnosticada || 'inicio',
         score: 0, // Não temos score nos dados antigos
-        pontosFortesIdentificados: diagnostico.principais_forcas || [],
-        principaisDificuldades: diagnostico.principais_riscos_ou_lacunas || [],
-        recomendacoes: diagnostico.recomendacoes || [],
-        planoAcao: diagnostico.resultado?.planoAcao || {
+        pontosFortesIdentificados: diagnosticoObj.principais_forcas || [],
+        principaisDificuldades: diagnosticoObj.principais_riscos_ou_lacunas || [],
+        recomendacoes: diagnosticoObj.recomendacoes || [],
+        planoAcao: diagnosticoObj.resultado?.planoAcao || {
           curto_prazo: [],
           medio_prazo: [],
           longo_prazo: []
@@ -107,18 +118,18 @@ router.post('/gerar', async (req, res) => {
     }
 
     // Se não foi gerado e não há respostas, retornar erro
-    if (!diagnostico.respostas || diagnostico.respostas.length === 0) {
+    if (!diagnosticoObj.respostas || diagnosticoObj.respostas.length === 0) {
       return res.status(400).json({
         success: false,
         message: 'Nenhuma resposta encontrada. Complete o questionário via WhatsApp primeiro.',
       });
     }
 
-    console.log(`Gerando diagnóstico com IA para: ${usuaria ? usuaria.nome : diagnostico.whatsapp}`);
+    console.log(`Gerando diagnóstico com IA para: ${usuaria ? usuaria.nome : diagnosticoObj.whatsapp}`);
 
     // Montar prompt com as respostas
     let promptRespostas = '';
-    diagnostico.respostas.forEach((item, index) => {
+    diagnosticoObj.respostas.forEach((item, index) => {
       promptRespostas += `Pergunta ${index + 1}: ${item.pergunta}\nResposta: ${item.resposta}\n\n`;
     });
 
@@ -128,7 +139,7 @@ router.post('/gerar', async (req, res) => {
 
 INFORMAÇÕES DA EMPREENDEDORA:
 Nome: ${usuaria ? usuaria.nome : 'Não informado'}
-WhatsApp: ${diagnostico.whatsapp}
+WhatsApp: ${diagnosticoObj.whatsapp}
 
 RESPOSTAS DO QUESTIONÁRIO:
 ${promptRespostas}
