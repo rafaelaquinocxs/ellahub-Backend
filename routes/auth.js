@@ -22,10 +22,14 @@ router.post('/login', async (req, res) => {
     // Primeiro tenta buscar exatamente como foi fornecido
     let diagnostico = await Diagnostico.findOne({ token });
     
-    // Se não encontrar, tenta buscar removendo os hífens do token no banco
-    if (!diagnostico) {
-      const diagnosticos = await Diagnostico.find({});
-      diagnostico = diagnosticos.find(d => d.token && d.token.replace(/-/g, '') === tokenNormalizado);
+    // Se não encontrar, cria uma regex que ignora hífens
+    if (!diagnostico && tokenNormalizado) {
+      // Cria um padrão que aceita hífens opcionais entre cada caractere
+      // Ex: 9129fc14135043dcad285cae90f83f32 -> 9129fc14-?1350-?43dc-?...
+      const regexPattern = tokenNormalizado.split('').join('-?');
+      diagnostico = await Diagnostico.findOne({ 
+        token: { $regex: new RegExp(`^${regexPattern}$`, 'i') } 
+      });
     }
 
     if (!diagnostico) {
