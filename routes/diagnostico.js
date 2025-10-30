@@ -68,8 +68,18 @@ router.post('/gerar', async (req, res) => {
       });
     }
 
-    // Buscar diagnóstico pelo token
-    const diagnostico = await Diagnostico.findOne({ token });
+    // Normalizar o token (remover hífens para buscar)
+    const tokenNormalizado = token.replace(/-/g, '');
+    
+    // Buscar diagnóstico pelo token (aceita com ou sem hífens)
+    // Primeiro tenta buscar exatamente como foi fornecido
+    let diagnostico = await Diagnostico.findOne({ token });
+    
+    // Se não encontrar, tenta buscar removendo os hífens do token no banco
+    if (!diagnostico) {
+      const diagnosticos = await Diagnostico.find({});
+      diagnostico = diagnosticos.find(d => d.token && d.token.replace(/-/g, '') === tokenNormalizado);
+    }
 
     if (!diagnostico) {
       return res.status(404).json({
@@ -351,8 +361,18 @@ router.get('/:token', async (req, res) => {
   try {
     const { token } = req.params;
 
-    // A busca deve ser feita diretamente no modelo Diagnostico pelo token
-    const diagnostico = await Diagnostico.findOne({ token });
+    // Normalizar o token (remover hífens para buscar)
+    const tokenNormalizado = token.replace(/-/g, '');
+    
+    // Buscar diagnóstico pelo token (aceita com ou sem hífens)
+    // Primeiro tenta buscar exatamente como foi fornecido
+    let diagnostico = await Diagnostico.findOne({ token });
+    
+    // Se não encontrar, tenta buscar removendo os hífens do token no banco
+    if (!diagnostico) {
+      const diagnosticos = await Diagnostico.find({});
+      diagnostico = diagnosticos.find(d => d.token && d.token.replace(/-/g, '') === tokenNormalizado);
+    }
 
     if (!diagnostico) {
       return res.status(404).json({
