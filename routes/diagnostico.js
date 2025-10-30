@@ -403,11 +403,21 @@ router.get('/:token', async (req, res) => {
     
     // Mapear dados do banco para o formato esperado pelo frontend
     // Se já tem resultado (gerado pela IA), mantém. Senão, mapeia dos campos do n8n
+    
+    // Calcular score baseado nos dados do diagnóstico
+    const calcularScore = (forcas, riscos) => {
+      const totalForcas = (forcas || []).length;
+      const totalRiscos = (riscos || []).length;
+      const total = totalForcas + totalRiscos;
+      if (total === 0) return 50; // Score padrão
+      return Math.round((totalForcas / total) * 100);
+    };
+    
     const resultado = diagnosticoObj.resultado && diagnosticoObj.resultado.score ? 
       diagnosticoObj.resultado : 
       {
         nivelNegocio: diagnosticoObj.fase_diagnosticada || 'inicio',
-        score: 0,
+        score: calcularScore(diagnosticoObj.principais_forcas, diagnosticoObj.principais_riscos_ou_lacunas),
         pontosFortesIdentificados: diagnosticoObj.principais_forcas || [],
         principaisDificuldades: diagnosticoObj.principais_riscos_ou_lacunas || [],
         recomendacoes: diagnosticoObj.recomendacoes || [],
