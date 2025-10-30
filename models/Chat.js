@@ -1,17 +1,22 @@
 const mongoose = require('mongoose');
 
 const chatSchema = new mongoose.Schema({
-  usuarioId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Usuario',
-    required: true
+  token: {
+    type: String,
+    required: true,
+    index: true
   },
-  conversas: [{
-    pergunta: {
+  whatsapp: {
+    type: String,
+    required: false
+  },
+  mensagens: [{
+    tipo: {
       type: String,
+      enum: ['usuario', 'ella'],
       required: true
     },
-    resposta: {
+    conteudo: {
       type: String,
       required: true
     },
@@ -28,7 +33,9 @@ const chatSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
+}, {
+  collection: 'chats',
+  strict: false
 });
 
 module.exports = mongoose.model('Chat', chatSchema);
-
