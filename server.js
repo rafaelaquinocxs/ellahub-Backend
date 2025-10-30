@@ -1,5 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
+// Importar modelos para garantir que o Mongoose os registre
+require('./models/Lead');
 const cors = require('cors');
 require('dotenv').config();
 
