@@ -422,11 +422,20 @@ router.get('/:token', async (req, res) => {
         principaisDificuldades: diagnosticoObj.principais_riscos_ou_lacunas || [],
         recomendacoes: diagnosticoObj.recomendacoes || [],
         planoAcao: (() => {
-          console.log('[DEBUG] diagnosticoObj.resultado:', diagnosticoObj.resultado);
-          console.log('[DEBUG] diagnosticoObj.resultado?.planoAcao:', diagnosticoObj.resultado?.planoAcao);
-          console.log('[DEBUG] diagnosticoObj.recomendacoes:', diagnosticoObj.recomendacoes);
+          // Verificar se já existe um plano de ação com conteúdo
+          const planoExistente = diagnosticoObj.resultado?.planoAcao;
+          const temConteudo = planoExistente && (
+            (planoExistente.curto_prazo && planoExistente.curto_prazo.length > 0) ||
+            (planoExistente.medio_prazo && planoExistente.medio_prazo.length > 0) ||
+            (planoExistente.longo_prazo && planoExistente.longo_prazo.length > 0)
+          );
           
-          return diagnosticoObj.resultado?.planoAcao || (
+          if (temConteudo) {
+            return planoExistente;
+          }
+          
+          // Criar plano baseado nas recomendações
+          return (
             // Criar plano de ação baseado nas recomendações se não houver
             diagnosticoObj.recomendacoes && diagnosticoObj.recomendacoes.length > 0 ? {
             curto_prazo: diagnosticoObj.recomendacoes.slice(0, Math.ceil(diagnosticoObj.recomendacoes.length / 3)),
