@@ -402,20 +402,25 @@ router.get('/:token', async (req, res) => {
     const diagnosticoObj = diagnostico.toObject();
     
     // Mapear dados do banco para o formato esperado pelo frontend
-    const diagnosticoFormatado = {
-      ...diagnosticoObj,
-      resultado: diagnosticoObj.resultado || {
+    // Se já tem resultado (gerado pela IA), mantém. Senão, mapeia dos campos do n8n
+    const resultado = diagnosticoObj.resultado && diagnosticoObj.resultado.score ? 
+      diagnosticoObj.resultado : 
+      {
         nivelNegocio: diagnosticoObj.fase_diagnosticada || 'inicio',
         score: 0,
         pontosFortesIdentificados: diagnosticoObj.principais_forcas || [],
         principaisDificuldades: diagnosticoObj.principais_riscos_ou_lacunas || [],
         recomendacoes: diagnosticoObj.recomendacoes || [],
-        planoAcao: {
+        planoAcao: diagnosticoObj.resultado?.planoAcao || {
           curto_prazo: [],
           medio_prazo: [],
           longo_prazo: []
         }
-      }
+      };
+    
+    const diagnosticoFormatado = {
+      ...diagnosticoObj,
+      resultado
     };
     
     return res.json({
