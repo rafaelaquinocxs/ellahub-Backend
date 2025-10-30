@@ -24,21 +24,18 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Retornar os dados
+    // Retornar os dados na mesma estrutura que /diagnostico/:token
     res.json({
       success: true,
       message: 'Login realizado com sucesso',
-      diagnostico: {
+      usuario: {
         id: diagnostico._id,
-        whatsapp: diagnostico.whatsapp,
-        token: diagnostico.token,
-        fase_diagnosticada: diagnostico.fase_diagnosticada,
-        resumo_diagnostico: diagnostico.resumo_diagnostico,
-        principais_forcas: diagnostico.principais_forcas,
-        principais_riscos_ou_lacunas: diagnostico.principais_riscos_ou_lacunas,
-        recomendacoes: diagnostico.recomendacoes,
-        created_at: diagnostico.created_at
-      }
+        nome: `Usuário ${diagnostico.whatsapp}`,
+        email: `${diagnostico.whatsapp}@whatsapp.com`,
+        diagnosticoCompleto: true,
+        nivelNegocio: diagnostico.fase_diagnosticada || 'Não definido',
+      },
+      diagnostico: diagnostico
     });
 
   } catch (error) {
