@@ -401,6 +401,23 @@ router.get('/:token', async (req, res) => {
     // Converter para objeto JavaScript puro para garantir acesso aos campos
     const diagnosticoObj = diagnostico.toObject();
     
+    // Mapear dados do banco para o formato esperado pelo frontend
+    const diagnosticoFormatado = {
+      ...diagnosticoObj,
+      resultado: diagnosticoObj.resultado || {
+        nivelNegocio: diagnosticoObj.fase_diagnosticada || 'inicio',
+        score: 0,
+        pontosFortesIdentificados: diagnosticoObj.principais_forcas || [],
+        principaisDificuldades: diagnosticoObj.principais_riscos_ou_lacunas || [],
+        recomendacoes: diagnosticoObj.recomendacoes || [],
+        planoAcao: {
+          curto_prazo: [],
+          medio_prazo: [],
+          longo_prazo: []
+        }
+      }
+    };
+    
     return res.json({
       success: true,
       usuario: {
@@ -410,7 +427,7 @@ router.get('/:token', async (req, res) => {
         diagnosticoCompleto: true,
         nivelNegocio: diagnosticoObj.fase_diagnosticada || 'Não definido',
       },
-      diagnostico: diagnosticoObj,
+      diagnostico: diagnosticoFormatado,
     });
   } catch (error) {
     console.error('Erro ao buscar diagnóstico:', error);
