@@ -60,17 +60,38 @@ router.post('/pergunta', async (req, res) => {
       timestamp: new Date(),
     });
 
-    // Construir contexto para a IA
+    // Construir contexto COMPLETO para a IA
     const diagnosticoObj = diagnostico.toObject();
-    const nivelNegocio = diagnosticoObj.fase_diagnosticada || 'não informado';
-    const pontosFortesIdentificados = diagnosticoObj.principais_forcas || [];
-    const principaisDificuldades = diagnosticoObj.principais_riscos_ou_lacunas || [];
+    
+    // Montar JSON completo do diagnóstico
+    const diagnosticoCompleto = {
+      fase_diagnosticada: diagnosticoObj.fase_diagnosticada,
+      resumo_diagnostico: diagnosticoObj.resumo_diagnostico,
+      principais_forcas: diagnosticoObj.principais_forcas || [],
+      principais_riscos_ou_lacunas: diagnosticoObj.principais_riscos_ou_lacunas || [],
+      recomendacoes: diagnosticoObj.recomendacoes || [],
+      plano_de_acao: diagnosticoObj.plano_de_acao || null
+    };
     
     const contexto = `
-CONTEXTO DO DIAGNÓSTICO DA EMPREENDEDORA:
-- Nível do Negócio: ${nivelNegocio}
-- Pontos Fortes: ${pontosFortesIdentificados.join(', ')}
-- Principais Dificuldades: ${principaisDificuldades.join(', ')}
+CONTEXTO COMPLETO DO DIAGNÓSTICO DA EMPREENDEDORA:
+
+**Fase do Negócio:** ${diagnosticoCompleto.fase_diagnosticada || 'Não informado'}
+
+**Resumo do Diagnóstico:**
+${diagnosticoCompleto.resumo_diagnostico || 'Não disponível'}
+
+**Principais Forças:**
+${diagnosticoCompleto.principais_forcas.map((f, i) => `${i + 1}. ${f}`).join('\n') || 'Nenhuma identificada'}
+
+**Principais Riscos ou Lacunas:**
+${diagnosticoCompleto.principais_riscos_ou_lacunas.map((r, i) => `${i + 1}. ${r}`).join('\n') || 'Nenhum identificado'}
+
+**Recomendações:**
+${diagnosticoCompleto.recomendacoes.map((r, i) => `${i + 1}. ${r}`).join('\n') || 'Nenhuma disponível'}
+
+**Plano de Ação:**
+${diagnosticoCompleto.plano_de_acao ? JSON.stringify(diagnosticoCompleto.plano_de_acao, null, 2) : 'Não disponível'}
 `;
 
     const systemPrompt = `Você é a ELLA, mentora especializada em negócios femininos e empoderamento empreendedor.
@@ -115,14 +136,24 @@ Seja específica, prática e empática. Use exemplos concretos e sempre ofereça
         apiKey: process.env.OPENAI_API_KEY
       });
       
+      // Buscar histórico de mensagens anteriores (até 10 últimas)
+      const mensagensAnteriores = chat.mensagens.slice(-10).map(msg => ({
+        role: msg.tipo === 'usuario' ? 'user' : 'assistant',
+        content: msg.conteudo
+      }));
+      
+      // Montar mensagens para o GPT (system + histórico + nova pergunta)
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        ...mensagensAnteriores,
+        { role: 'user', content: pergunta }
+      ];
+      
       const response = await client.chat.completions.create({
-        model: 'gpt-4.1-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: pergunta }
-        ],
+        model: 'gpt-4o', // Melhor modelo disponível
+        messages: messages,
         temperature: 0.7,
-        max_tokens: 1500
+        max_tokens: 2000 // Aumentado para respostas mais completas
       });
       
       resposta = response.choices[0].message.content;
