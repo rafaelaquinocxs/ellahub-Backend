@@ -15,6 +15,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/diagnostico', require('./routes/diagnostico'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/lead', require('./routes/lead'));
 
 // Rota de teste
 app.get('/', (req, res) => {
