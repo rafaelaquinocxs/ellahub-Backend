@@ -80,7 +80,12 @@ router.get('/dashboard', authAdminJWT, async (req, res) => {
     const totalLeads = await Lead.countDocuments();
     
     // Total de diagnósticos completados
-    const totalDiagnosticos = await Diagnostico.countDocuments({ 'resultado.nivelNegocio': { $exists: true } });
+    const totalDiagnosticos = await Diagnostico.countDocuments({ 
+      $or: [
+        { 'resultado.nivelNegocio': { $exists: true } },
+        { 'resumo_diagnostico': { $exists: true, $ne: null } }
+      ]
+    });
     
     // Taxa de conversão
     const taxaConversao = totalLeads > 0 ? ((totalDiagnosticos / totalLeads) * 100).toFixed(2) : 0;
@@ -93,12 +98,15 @@ router.get('/dashboard', authAdminJWT, async (req, res) => {
     // Diagnósticos nos últimos 7 dias
     const diagnosticosUltimos7dias = await Diagnostico.countDocuments({ 
       criadoEm: { $gte: dataLimite7dias },
-      'resultado.nivelNegocio': { $exists: true }
+      $or: [
+        { 'resultado.nivelNegocio': { $exists: true } },
+        { 'resumo_diagnostico': { $exists: true, $ne: null } }
+      ]
     });
     
     // Distribuição por nível de negócio
     const distribuicaoNivel = await Diagnostico.aggregate([
-      { $match: { 'resultado.nivelNegocio': { $exists: true } } },
+      { $match: { $or: [ { 'resultado.nivelNegocio': { $exists: true } }, { 'resumo_diagnostico': { $exists: true, $ne: null } } ] } },
       {
         $group: {
           _id: '$resultado.nivelNegocio',
@@ -110,7 +118,7 @@ router.get('/dashboard', authAdminJWT, async (req, res) => {
     
     // Top 10 dificuldades mais citadas
     const dificuldadesMaisCitadas = await Diagnostico.aggregate([
-      { $match: { 'resultado.principaisDificuldades': { $exists: true } } },
+      { $match: { $or: [ { 'resultado.principaisDificuldades': { $exists: true } }, { 'principais_riscos_ou_lacunas': { $exists: true } } ] } },
       { $unwind: '$resultado.principaisDificuldades' },
       {
         $group: {
@@ -124,7 +132,7 @@ router.get('/dashboard', authAdminJWT, async (req, res) => {
     
     // Top 10 pontos fortes mais citados
     const pontosForteMaisCitados = await Diagnostico.aggregate([
-      { $match: { 'resultado.pontosFortesIdentificados': { $exists: true } } },
+      { $match: { $or: [ { 'resultado.pontosFortosIdentificados': { $exists: true } }, { 'principais_forcas': { $exists: true } } ] } },},{find:
       { $unwind: '$resultado.pontosFortesIdentificados' },
       {
         $group: {
@@ -316,7 +324,7 @@ router.get('/estatisticas/periodo', authAdminJWT, async (req, res) => {
     
     const leadsNoPeriodo = await Lead.countDocuments(filtro);
     
-    const diagnosticosFiltro = { ...filtro, 'resultado.nivelNegocio': { $exists: true } };
+    const diagnosticosFiltro = { ...filtro, $or: [ { 'resultado.nivelNegocio': { $exists: true } }, { 'resumo_diagnostico': { $exists: true, $ne: null } } ] };
     diagnosticosFiltro.criadoEm = filtro.dataCaptura;
     delete diagnosticosFiltro.dataCaptura;
     
