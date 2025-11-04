@@ -8,7 +8,18 @@ require('dotenv').config();
 const app = express();
 
 // Middleware
-app.use(cors());
+const allowedOrigins = ['https://diagnostico.ellahub.com', 'http://localhost:5173']; // Adicionar o domínio de produção e local
+app.use(cors({
+  origin: (origin, callback) => {
+    // Permitir requisições sem 'origin' (como apps mobile ou curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'A política de CORS para este site não permite acesso a partir da origem ' + origin;
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  }
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
