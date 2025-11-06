@@ -132,7 +132,7 @@ router.get('/dashboard', authAdminJWT, async (req, res) => {
     
     // Top 10 pontos fortes mais citados
     const pontosForteMaisCitados = await Diagnostico.aggregate([
-      { $match: { $or: [ { 'resultado.pontosFortosIdentificados': { $exists: true } }, { 'principais_forcas': { $exists: true } } ] } },},{find:
+      { $match: { $or: [ { 'resultado.pontosFortesIdentificados': { $exists: true } }, { 'principais_forcas': { $exists: true } } ] } },
       { $unwind: '$resultado.pontosFortesIdentificados' },
       {
         $group: {
